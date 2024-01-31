@@ -1,8 +1,8 @@
 #pragma once
+#include <glm/glm.hpp>
 
-class Boids{
-    
-    float x, y;
+class Boids {
+    glm::vec2 coordonnee;
 
     float acceleration, velocity, position;
     float taille;

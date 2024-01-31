@@ -10,7 +10,7 @@ int main()
         return EXIT_FAILURE;
 
     // Actual application code
-    auto ctx = p6::Context{{.title = "Simple-p6-Setup"}};
+    auto        ctx           = p6::Context{{.title = "Simple-p6-Setup"}};
     auto        square_radius = 0.5f;
     std::string text          = "Hello";
     ctx.maximize_window();
