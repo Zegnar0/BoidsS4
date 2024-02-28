@@ -3,13 +3,26 @@
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest/doctest.h"
 #include "p6/p6.h"
-float speed = 0.1; // Default speed
 
-// Function to set speed
-void set_speed(float new_speed)
+struct Boids {
+    glm::vec2 position;
+    glm::vec2 velocity;
+    float     angle;
+};
+
+Boids boids[100];
+
+void random_init_boids()
 {
-    speed = new_speed;
+    for (auto& boid : boids)
+    {
+        boid.position = {p6::random::number(), p6::random::number()};
+        boid.velocity = {p6::random::number(), p6::random::number()};
+        boid.angle    = 15;
+    }
 }
+
+float speed = 0.5f;
 
 int main()
 {
@@ -23,10 +36,25 @@ int main()
 
     std::string text = "Hello";
     ctx.maximize_window();
+    random_init_boids();
 
     // Declare your infinite update loop.
     ctx.update = [&]() {
-        angle += speed * 0.01_turn; // Use speed here
+        angle += speed * 0.01_turn;
+        ctx.background(p6::NamedColor::Blue);
+
+        for (auto& boid : boids)
+        {
+            boid.angle += 0.01f;
+            ctx.fill               = {1, 0, 0, 0.5};
+            float      aspectRatio = ctx.aspect_ratio();
+            float      x           = std::fmod(speed * boid.position.x * ctx.time(), 2 * aspectRatio) - aspectRatio;
+            float      y           = std::fmod(speed * boid.position.y * ctx.time(), 2.0f) - 1.0f;
+            const auto sg1         = ctx.transform_scope_guard();
+            ctx.translate({x, y});
+            ctx.equilateral_triangle(p6::Center{}, 0.1f, angle);
+        }
+        // Use speed here
         // ImGui::Begin("Test");
         // ImGui::SliderFloat("Square size", &square_radius, 0.f, 1.f);
         // ImGui::InputText("Text", &text);
@@ -34,16 +62,6 @@ int main()
         // Show the official ImGui demo window
         // It is very useful to discover all the widgets available in ImGui
         // ImGui::ShowDemoWindow();
-        ctx.background(p6::NamedColor::Blue);
-        ctx.fill          = {1, 0, 0, 0.5};
-        float aspectRatio = ctx.aspect_ratio();
-        float x           = std::fmod(0.5f * ctx.time(), 2 * aspectRatio) - aspectRatio;
-        float y           = std::fmod(0.5f * ctx.time(), 2.0f) - 1.0f;
-        x += speed; // Use speed here
-        y += speed; // Use speed here
-        const auto sg1 = ctx.transform_scope_guard();
-        ctx.translate({x, y});
-        ctx.equilateral_triangle(p6::Center{}, 0.2f, angle);
     };
 
     // Should be done last. It starts the infinite loop.
