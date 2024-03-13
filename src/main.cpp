@@ -10,12 +10,13 @@ struct Boids {
     glm::vec2 velocity;
 };
 
-Boids boids[5];
+Boids boids[50];
 
 // Définition des constantes pour les règles de Boids
 const float alignment_radius  = 0.5f; // Rayon pour le calcul de l'alignement
 const float separation_radius = 0.2f; // Rayon pour le calcul de la séparation
 const float cohesion_radius   = 0.7f; // Rayon pour le calcul de la cohésion
+const float max_velocity      = 1.0f;
 
 void random_init_boids()
 {
@@ -115,6 +116,12 @@ void update_boids()
             cohesion_force /= static_cast<float>(nearby_boids_cohesion.size());
             glm::vec2 direction_to_center = cohesion_force - boid.position;
             boid.velocity += glm::normalize(direction_to_center);
+        }
+
+        float current_velocity = glm::length(boid.velocity);
+        if (current_velocity > max_velocity)
+        {
+            boid.velocity = glm::normalize(boid.velocity) * max_velocity;
         }
     }
 }
