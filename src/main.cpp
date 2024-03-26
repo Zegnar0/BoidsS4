@@ -10,13 +10,14 @@ struct Boids {
     glm::vec2 velocity;
 };
 
-Boids boids[50];
+Boids boids[100];
 
 // Définition des constantes pour les règles de Boids
-const float alignment_radius  = 0.5f; // Rayon pour le calcul de l'alignement
-const float separation_radius = 0.2f; // Rayon pour le calcul de la séparation
-const float cohesion_radius   = 0.7f; // Rayon pour le calcul de la cohésion
+float       alignment_radius  = 0.5f; // Rayon pour le calcul de l'alignement
+float       separation_radius = 0.2f; // Rayon pour le calcul de la séparation
+float       cohesion_radius   = 0.7f; // Rayon pour le calcul de la cohésion
 const float max_velocity      = 1.0f;
+auto        triangle_radius   = 0.1f;
 
 void random_init_boids()
 {
@@ -53,7 +54,7 @@ void update_boids()
         std::vector<Boids> nearby_boids_alignment;
         std::vector<Boids> nearby_boids_separation;
         std::vector<Boids> nearby_boids_cohesion;
-        float              min_separation_distance = 100.f;
+        float              min_separation_distance = triangle_radius * 2.f;
         // Calcul des boids voisins
         for (const auto& other_boid : boids)
         {
@@ -82,6 +83,7 @@ void update_boids()
         if (!nearby_boids_alignment.empty())
         {
             std::vector<glm::vec2> velocities;
+            velocities.reserve(nearby_boids_alignment.size());
             for (const auto& nearby_boid : nearby_boids_alignment)
             {
                 velocities.push_back(nearby_boid.velocity);
@@ -133,8 +135,8 @@ int main()
         return EXIT_FAILURE;
 
     // Actual application code
-    auto ctx             = p6::Context{{.title = "Boids Boids Boids"}};
-    auto triangle_radius = 0.1f;
+    auto ctx = p6::Context{{.title = "Boids Boids Boids"}};
+
     ctx.maximize_window();
     random_init_boids();
 
@@ -142,8 +144,9 @@ int main()
     ctx.update = [&]() {
         ImGui::Begin("Param");
         ImGui::SliderFloat("Triangle size", &triangle_radius, 0.f, 1.f);
-        // ImGui::SliderFloat("Triangle vitesse X", &vitesseX, -2.f, 2.f);
-        // ImGui::SliderFloat("Triangle vitesse Y", &vitesseY, -2.f, 2.f);
+        ImGui::SliderFloat("Alignement", &alignment_radius, -2.f, 2.f);
+        ImGui::SliderFloat("Séparation", &separation_radius, -2.f, 2.f);
+        ImGui::SliderFloat("Cohésion", &cohesion_radius, -2.f, 2.f);
         ImGui::End();
         ctx.background(p6::NamedColor::Blue);
         for (auto& boid : boids)
@@ -153,8 +156,6 @@ int main()
                 boid.angle = boid.angle + p6::random::angle();
             }*/
             const auto sg1 = ctx.transform_scope_guard();
-            // boid.velocity.x = std::cos(boid.angle.as_radians());
-            //   boid.velocity.y = std::sin(boid.angle.as_radians());
             boid.position.x += boid.velocity.x * ctx.delta_time();
             boid.position.y += boid.velocity.y * ctx.delta_time();
 
