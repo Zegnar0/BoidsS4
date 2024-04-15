@@ -1,3 +1,5 @@
+// OBJ Loader to get our model in OpenGL
+
 /*
 The MIT License (MIT)
 

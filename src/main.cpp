@@ -13,26 +13,27 @@
 
 int main()
 {
+    // Initialisation
     auto ctx = p6::Context{{1280, 720, "Boids3D"}};
     ctx.maximize_window();
-
+    // Init de la camera
     FreeflyCamera camera;
-
+    // Init des Shaders
     const p6::Shader shader = p6::load_shader(
         "shaders/3D.vs.glsl",
         "shaders/pointLight.fs.glsl"
     );
-
+    // Création du VBO
     GLuint vbo;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     std::string warn;
     std::string err;
-
+    // Ajout des Models
     std::string              inputfile = "../Models/boids.obj";
     tinyobj::ObjReaderConfig reader_config;
     reader_config.mtl_search_path = "../Models"; // Path to material files
-
+    // TinyObjReader qui s'occupe de lire le model et de le parser
     tinyobj::ObjReader reader;
 
     if (!reader.ParseFromFile(inputfile, reader_config))
@@ -48,10 +49,13 @@ int main()
     {
         std::cout << "TinyObjReader: " << reader.Warning();
     }
+
+    // Ajout des points et des faces du model au bon endroit ( les textures ne marchent pas encore avec materials en gris)
     auto& attrib    = reader.GetAttrib();
     auto& shapes    = reader.GetShapes();
     auto& materials = reader.GetMaterials();
 
+    // Placement des points et des faces au bon endroits
     std::vector<glimac::ShapeVertex> vertices;
     for (const auto& shape : shapes)
     {
@@ -70,7 +74,7 @@ int main()
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glimac::ShapeVertex), vertices.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-
+    // Création du VAO
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -81,6 +85,7 @@ int main()
     glEnableVertexAttribArray(vertex_attr_normal);
     glEnableVertexAttribArray(vertex_attr_UV);
 
+    // On explique à OpenGL comment lire les données avec les attributs des tout ce qu'on a mis dans le VBO et le VAO
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glVertexAttribPointer(vertex_attr_position, 3, GL_FLOAT, GL_FALSE, sizeof(glimac::ShapeVertex), (const GLvoid*)offsetof(glimac::ShapeVertex, position));
     glVertexAttribPointer(vertex_attr_normal, 3, GL_FLOAT, GL_FALSE, sizeof(glimac::ShapeVertex), (const GLvoid*)offsetof(glimac::ShapeVertex, normal));
@@ -89,6 +94,7 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
+    // On récupère tout les détails dans les shaders (lumiere, position, normale, texture et matrice) pou les envoyer dans la boucle de rendu
     GLuint uMVPMatrixLocation      = glGetUniformLocation(shader.id(), "uMVPMatrix");
     GLuint uMVMatrixLocation       = glGetUniformLocation(shader.id(), "uMVMatrix");
     GLuint uNormalMatrixLocation   = glGetUniformLocation(shader.id(), "uNormalMatrix");
@@ -100,10 +106,11 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-    // Declare your infinite update loop.
+    // La boucle de renduu
     ctx.update = [&]() {
+        // On démarre la cam
         glm::mat4 viewMatrix = camera.getViewMatrix();
-
+        // On récupère les inputs clavier pour bouger la caméra
         if (ctx.key_is_pressed(GLFW_KEY_D))
         {
             camera.moveLeft(-0.1f);
@@ -120,29 +127,28 @@ int main()
         {
             camera.moveFront(-0.1f);
         };
-
+        // On récupère les inputs souris pour bouger la caméra
         ctx.mouse_moved = [&camera](p6::MouseMove button) {
             camera.rotateLeft(-button.position.x);
             camera.rotateUp(button.position.y);
         };
-
+        // On indique que il faut lire les shaders et tout réadapter a cette frame
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glBindVertexArray(vao);
         shader.use();
-
+        // On crée les matrices pour faire tourner l'objet au milieur de l'écran
         glActiveTexture(GL_TEXTURE0);
         glm::mat4 ProjMatrix   = glm::perspective(glm::radians(70.f), ctx.aspect_ratio(), 0.1f, 100.f);
         glm::mat4 MVMatrix     = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f));
         MVMatrix               = glm::rotate(MVMatrix, ctx.time(), glm::vec3(0.f, 1.f, 0.f));
         glm::mat4 NormalMatrix = glm::transpose(glm::inverse(MVMatrix));
-
+        // On S'occupe de la lumière pour qu'elle se comporte comme il faut
         glm::vec3 lightPos = glm::vec3(glm::rotate(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), ctx.time(), glm::vec3(0.0f, 1.0f, 0.0f)));
-        lightPos *= 5.0f; // Scale the position for a larger spiral
-
-        glm::vec3 lightPos_vs = glm::vec3(viewMatrix * glm::vec4(lightPos, 1.0f)); // Transform light position to view space
-
+        lightPos *= 5.0f;
+        glm::vec3 lightPos_vs = glm::vec3(viewMatrix * glm::vec4(lightPos, 1.0f));
+        // On crée une matrice avec tout les éléments avant pour que l'on puisse la donner propre aux shaders
         glm::mat4 MVPMatrix = ProjMatrix * viewMatrix * MVMatrix;
-
+        // On envoie toute les viarables uniformes qu'on a crée ligne 97 pour que les shaders puissent les utiliser et avoir tout qui fonctionne super
         glUniformMatrix4fv(uMVPMatrixLocation, 1, GL_FALSE, glm::value_ptr(MVPMatrix));
         glUniformMatrix4fv(uMVMatrixLocation, 1, GL_FALSE, glm::value_ptr(MVMatrix));
         glUniformMatrix4fv(uNormalMatrixLocation, 1, GL_FALSE, glm::value_ptr(NormalMatrix));
@@ -151,9 +157,9 @@ int main()
         glUniform1f(uShininessLocation, 32.0f);                             // Example value for shininess
         glUniform3fv(uLightPos_vsLocation, 1, glm::value_ptr(lightPos_vs)); // Send transformed light position
         glUniform3f(uLightIntensityLocation, 1.0f, 1.0f, 1.0f);             // Example values for light intensity
-
+        // On dessine le poisson
         glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-
+        // On nettoie tout pour que tout soit propre et que il y a pas des textures qui se mélangent ou restent dans la mémoire
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture unit GL_TEXTURE0
         glActiveTexture(GL_TEXTURE1);
@@ -161,7 +167,7 @@ int main()
         glBindVertexArray(0);
     };
 
-    // Should be done last. It starts the infinite loop.
+    // Ca c'est pour démarre la boucle de rendu et la fermer proprement
     ctx.start();
     glDeleteBuffers(1, &vbo);
     glDeleteVertexArrays(1, &vao);
