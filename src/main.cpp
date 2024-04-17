@@ -3,7 +3,9 @@
 #include <cstddef>
 #include <glm/gtc/random.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "boidsManager.hpp"
 #include "p6/p6.h"
+#include "parameters.hpp"
 #include "src-common/glimac/FreeflyCamera.hpp"
 #include "src-common/glimac/common.hpp"
 #include "src-common/glimac/cone_vertices.hpp"
@@ -23,6 +25,20 @@ int main()
         "shaders/3D.vs.glsl",
         "shaders/pointLight.fs.glsl"
     );
+
+    // Initialisation des paramètres
+    Parameters parameters{};
+    parameters.triangleRadius          = 0.1f;
+    parameters.alignmentRadius         = 0.138f;
+    parameters.separationRadius        = 0.286f;
+    parameters.cohesionRadius          = -0.494f;
+    parameters.maxVelocity             = 1.0f;
+    parameters.min_separation_distance = parameters.triangleRadius * 2.f;
+
+    // Initialisation de BoidsManager
+    BoidsManager boidsManager(parameters);
+    boidsManager.randomInitBoids();
+
     // Création du VBO
     GLuint vbo;
     glGenBuffers(1, &vbo);
@@ -62,10 +78,10 @@ int main()
         for (const auto& index : shape.mesh.indices)
         {
             glimac::ShapeVertex v;
-            v.position = glm::vec3{attrib.vertices[3 * index.vertex_index], attrib.vertices[3 * index.vertex_index + 1], attrib.vertices[3 * index.vertex_index + 2]};
-            v.normal   = glm::vec3{attrib.normals[3 * index.vertex_index], attrib.normals[3 * index.vertex_index + 1], attrib.normals[3 * index.vertex_index + 2]};
+            v.position  = glm::vec3{attrib.vertices[3 * index.vertex_index], attrib.vertices[3 * index.vertex_index + 1], attrib.vertices[3 * index.vertex_index + 2]};
+            v.normal    = glm::vec3{attrib.normals[3 * index.normal_index], attrib.normals[3 * index.normal_index + 1], attrib.normals[3 * index.normal_index + 2]};
+            v.texCoords = glm::vec2{attrib.texcoords[2 * index.texcoord_index], attrib.texcoords[2 * index.texcoord_index + 1]}; // Déplacer cette ligne à l'intérieur de la boucle interne
             vertices.push_back(v);
-            v.texCoords = glm::vec2{attrib.texcoords[2 * size_t(index.texcoord_index) + 0], attrib.texcoords[2 * size_t(index.texcoord_index) + 1]};
         }
     }
 
@@ -94,7 +110,7 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    // On récupère tout les détails dans les shaders (lumiere, position, normale, texture et matrice) pou les envoyer dans la boucle de rendu
+    // On récupère tout les détails dans les shaders (lumière, position, normale, texture et matrice) pou les envoyer dans la boucle de rendu
     GLuint uMVPMatrixLocation      = glGetUniformLocation(shader.id(), "uMVPMatrix");
     GLuint uMVMatrixLocation       = glGetUniformLocation(shader.id(), "uMVMatrix");
     GLuint uNormalMatrixLocation   = glGetUniformLocation(shader.id(), "uNormalMatrix");
@@ -106,8 +122,19 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-    // La boucle de renduu
+    // La boucle de rendu
     ctx.update = [&]() {
+        // ImGui
+        ImGui::Begin("Paramètres");
+        ImGui::SliderFloat("Taille du triangle", &parameters.triangleRadius, 0.f, 1.f);
+        ImGui::SliderFloat("Alignement", &parameters.alignmentRadius, -2.f, 2.f);
+        ImGui::SliderFloat("Séparation", &parameters.separationRadius, -2.f, 2.f);
+        ImGui::SliderFloat("Cohésion", &parameters.cohesionRadius, -2.f, 2.f);
+        ImGui::End();
+
+        // Fond
+        ctx.background(p6::NamedColor::Blue);
+
         // On démarre la cam
         glm::mat4 viewMatrix = camera.getViewMatrix();
         // On récupère les inputs clavier pour bouger la caméra
@@ -136,7 +163,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glBindVertexArray(vao);
         shader.use();
-        // On crée les matrices pour faire tourner l'objet au milieur de l'écran
+        // On crée les matrices pour faire tourner l'objet au milieu de l'écran
         glActiveTexture(GL_TEXTURE0);
         glm::mat4 ProjMatrix   = glm::perspective(glm::radians(70.f), ctx.aspect_ratio(), 0.1f, 100.f);
         glm::mat4 MVMatrix     = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f));
@@ -148,7 +175,7 @@ int main()
         glm::vec3 lightPos_vs = glm::vec3(viewMatrix * glm::vec4(lightPos, 1.0f));
         // On crée une matrice avec tout les éléments avant pour que l'on puisse la donner propre aux shaders
         glm::mat4 MVPMatrix = ProjMatrix * viewMatrix * MVMatrix;
-        // On envoie toute les viarables uniformes qu'on a crée ligne 97 pour que les shaders puissent les utiliser et avoir tout qui fonctionne super
+        // On envoie toute les variables uniformes qu'on a crée ligne 97 pour que les shaders puissent les utiliser et avoir tout qui fonctionne super
         glUniformMatrix4fv(uMVPMatrixLocation, 1, GL_FALSE, glm::value_ptr(MVPMatrix));
         glUniformMatrix4fv(uMVMatrixLocation, 1, GL_FALSE, glm::value_ptr(MVMatrix));
         glUniformMatrix4fv(uNormalMatrixLocation, 1, GL_FALSE, glm::value_ptr(NormalMatrix));
@@ -165,6 +192,9 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture unit GL_TEXTURE1
         glBindVertexArray(0);
+
+        // Update et Draw des boids
+        boidsManager.update(&ctx, parameters);
     };
 
     // Ca c'est pour démarre la boucle de rendu et la fermer proprement
