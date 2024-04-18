@@ -2,7 +2,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/random.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "glimac/sphere_vertices.hpp"
+#include "../src/src-common/glimac/sphere_vertices.hpp"
 #include "p6/p6.h"
 
 // Initialisation
@@ -109,7 +109,7 @@ void Boids::updateBoids(Parameters param, const Boids& other_boid, std::vector<B
 }
 
 // Dessin des boids
-void Boids::drawBoids(const Parameters& param, p6::Context* ctx, const std::vector<BoidsModel>& boidsModels)
+void Boids::drawBoids(const Parameters& param, p6::Context* ctx)
 {
     const auto sg1 = ctx->transform_scope_guard();
 
@@ -142,6 +142,6 @@ void Boids::drawBoids(const Parameters& param, p6::Context* ctx, const std::vect
 
     ctx->translate({position});
     ctx->fill = {1, 0, 0, 0.5};
-    // ctx->equilateral_triangle(p6::Center{}, param.triangleRadius);
-    const std::vector<glimac::ShapeVertex> vertices = glimac::sphere_vertices(1.f, 32, 16);
+    ctx->equilateral_triangle(p6::Center{}, param.triangleRadius);
+    // const std::vector<glimac::ShapeVertex> vertices = glimac::sphere_vertices(1.f, 32, 16);
 }

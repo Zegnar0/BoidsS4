@@ -17,9 +17,9 @@ public:
     void loadBoidsModel();
 
 private:
-    std::vector<Boids>      boids{10};
-    std::vector<BoidsModel> boidsModel;
-    Parameters              parameters{};
+    std::vector<Boids> boids{10};
+    // std::vector<BoidsModel> boidsModel;
+    Parameters parameters{};
 };
 
 #endif

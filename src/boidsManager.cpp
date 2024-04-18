@@ -23,13 +23,13 @@ void BoidsManager::randomInitBoids()
 void BoidsManager::update(p6::Context* ctx, const Parameters& params)
 {
     // Charger le modèle des boids s'il n'a pas encore été chargé
-    if (boidsModel.empty())
-    {
-        loadBoidsModel();
-    }
+    // if (boidsModel.empty())
+    // {
+    //     loadBoidsModel();
+    // }
     for (auto& boid : boids)
     {
-        boid.drawBoids(params, ctx, boidsModel);
+        boid.drawBoids(params, ctx);
 
         // Création des vecteurs des boids voisins
         std::vector<Boids> nearby_boids_alignment;
@@ -43,40 +43,40 @@ void BoidsManager::update(p6::Context* ctx, const Parameters& params)
     }
 }
 
-void BoidsManager::loadBoidsModel()
-{
-    std::string              inputfile = "../Models/boid_model.obj"; // Mettez le chemin correct vers votre modèle de boid
-    tinyobj::ObjReader       reader;
-    tinyobj::ObjReaderConfig reader_config;
-    reader_config.mtl_search_path = "../Models"; // Mettez le chemin correct vers les fichiers MTL si nécessaire
+// void BoidsManager::loadBoidsModel()
+// {
+//     std::string              inputfile = "../Models/boid_model.obj"; // Mettez le chemin correct vers votre modèle de boid
+//     tinyobj::ObjReader       reader;
+//     tinyobj::ObjReaderConfig reader_config;
+//     reader_config.mtl_search_path = "../Models"; // Mettez le chemin correct vers les fichiers MTL si nécessaire
 
-    if (!reader.ParseFromFile(inputfile, reader_config))
-    {
-        if (!reader.Error().empty())
-        {
-            std::cerr << "TinyObjReader: " << reader.Error();
-        }
-        exit(1);
-    }
+//     if (!reader.ParseFromFile(inputfile, reader_config))
+//     {
+//         if (!reader.Error().empty())
+//         {
+//             std::cerr << "TinyObjReader: " << reader.Error();
+//         }
+//         exit(1);
+//     }
 
-    auto& attrib = reader.GetAttrib();
-    auto& shapes = reader.GetShapes();
+//     auto& attrib = reader.GetAttrib();
+//     auto& shapes = reader.GetShapes();
 
-    for (const auto& shape : shapes)
-    {
-        std::vector<glm::vec3>    vertices;
-        std::vector<unsigned int> indices;
+//     for (const auto& shape : shapes)
+//     {
+//         std::vector<glm::vec3>    vertices;
+//         std::vector<unsigned int> indices;
 
-        for (const auto& index : shape.mesh.indices)
-        {
-            glm::vec3 vertex;
-            vertex.x = attrib.vertices[3 * index.vertex_index + 0];
-            vertex.y = attrib.vertices[3 * index.vertex_index + 1];
-            vertex.z = attrib.vertices[3 * index.vertex_index + 2];
-            vertices.push_back(vertex);
-            indices.push_back(indices.size());
-        }
+//         for (const auto& index : shape.mesh.indices)
+//         {
+//             glm::vec3 vertex;
+//             vertex.x = attrib.vertices[3 * index.vertex_index + 0];
+//             vertex.y = attrib.vertices[3 * index.vertex_index + 1];
+//             vertex.z = attrib.vertices[3 * index.vertex_index + 2];
+//             vertices.push_back(vertex);
+//             indices.push_back(indices.size());
+//         }
 
-        boidsModel.push_back(BoidsModel(vertices, indices));
-    }
-}
+//         boidsModel.push_back(BoidsModel(vertices, indices));
+//     }
+// }
