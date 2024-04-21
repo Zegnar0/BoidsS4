@@ -1,16 +1,15 @@
 #include <cmath>
+
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <cstddef>
 #include <glm/gtc/random.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "p6/p6.h"
+#include "src-common/glimac/BufferManager.hpp"
 #include "src-common/glimac/FreeflyCamera.hpp"
+#include "src-common/glimac/ModelLoader.hpp"
 #include "src-common/glimac/common.hpp"
-#include "src-common/glimac/cone_vertices.hpp"
-#include "src-common/glimac/default_shader.hpp"
-#include "src-common/glimac/sphere_vertices.hpp"
 #include "tiny_obj_loader.h"
-
 int main()
 {
     // Initialisation
@@ -23,76 +22,44 @@ int main()
         "shaders/3D.vs.glsl",
         "shaders/pointLight.fs.glsl"
     );
-    // Création du VBO
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    std::string warn;
-    std::string err;
-    // Ajout des Models
-    std::string              inputfile = "../Models/boids.obj";
-    tinyobj::ObjReaderConfig reader_config;
-    reader_config.mtl_search_path = "../Models"; // Path to material files
-    // TinyObjReader qui s'occupe de lire le model et de le parser
-    tinyobj::ObjReader reader;
 
-    if (!reader.ParseFromFile(inputfile, reader_config))
+    auto          vertices1 = loadModel("../Models/Requin.obj");
+    BufferManager bufferManager1;
+    bufferManager1.createBuffers(vertices1);
+
+    auto          vertices2 = loadModel("../Models/zone.obj");
+    BufferManager bufferManager2;
+    bufferManager2.createBuffers(vertices2);
+
+    auto          vertices3 = loadModel("../Models/starwork.obj");
+    BufferManager bufferManager3;
+    bufferManager3.createBuffers(vertices3);
+
+    auto          vertices4 = loadModel("../Models/Boids.obj");
+    BufferManager bufferManager4;
+    bufferManager4.createBuffers(vertices4);
+
+    // Texture loading (kept unchanged)
+    GLuint triforceTexture;
+    try
     {
-        if (!reader.Error().empty())
-        {
-            std::cerr << "TinyObjReader: " << reader.Error();
-        }
-        exit(1);
+        const std::string triforceImagePath = "../Textures/fish.png";
+        img::Image        triforceImage     = p6::load_image_buffer(triforceImagePath);
+        glGenTextures(1, &triforceTexture);
+        glBindTexture(GL_TEXTURE_2D, triforceTexture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, triforceImage.width(), triforceImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, triforceImage.data());
+        glGenerateMipmap(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
-
-    if (!reader.Warning().empty())
+    catch (const std::exception& e)
     {
-        std::cout << "TinyObjReader: " << reader.Warning();
+        std::cerr << "Error loading texture: " << e.what() << std::endl;
+        return EXIT_FAILURE;
     }
-
-    // Ajout des points et des faces du model au bon endroit ( les textures ne marchent pas encore avec materials en gris)
-    auto& attrib    = reader.GetAttrib();
-    auto& shapes    = reader.GetShapes();
-    auto& materials = reader.GetMaterials();
-
-    // Placement des points et des faces au bon endroits
-    std::vector<glimac::ShapeVertex> vertices;
-    for (const auto& shape : shapes)
-    {
-        for (const auto& index : shape.mesh.indices)
-        {
-            glimac::ShapeVertex v;
-            v.position = glm::vec3{attrib.vertices[3 * index.vertex_index], attrib.vertices[3 * index.vertex_index + 1], attrib.vertices[3 * index.vertex_index + 2]};
-            v.normal   = glm::vec3{attrib.normals[3 * index.vertex_index], attrib.normals[3 * index.vertex_index + 1], attrib.normals[3 * index.vertex_index + 2]};
-            vertices.push_back(v);
-            v.texCoords = glm::vec2{attrib.texcoords[2 * size_t(index.texcoord_index) + 0], attrib.texcoords[2 * size_t(index.texcoord_index) + 1]};
-        }
-    }
-
-    // const std::vector<glimac::ShapeVertex> vertices = glimac::sphere_vertices(1.f, 32, 16);
-
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glimac::ShapeVertex), vertices.data(), GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    // Création du VAO
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    static constexpr GLuint vertex_attr_position = 0;
-    static constexpr GLuint vertex_attr_normal   = 1;
-    static constexpr GLuint vertex_attr_UV       = 2;
-    glEnableVertexAttribArray(vertex_attr_position);
-    glEnableVertexAttribArray(vertex_attr_normal);
-    glEnableVertexAttribArray(vertex_attr_UV);
-
-    // On explique à OpenGL comment lire les données avec les attributs des tout ce qu'on a mis dans le VBO et le VAO
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glVertexAttribPointer(vertex_attr_position, 3, GL_FLOAT, GL_FALSE, sizeof(glimac::ShapeVertex), (const GLvoid*)offsetof(glimac::ShapeVertex, position));
-    glVertexAttribPointer(vertex_attr_normal, 3, GL_FLOAT, GL_FALSE, sizeof(glimac::ShapeVertex), (const GLvoid*)offsetof(glimac::ShapeVertex, normal));
-    glVertexAttribPointer(vertex_attr_UV, 2, GL_FLOAT, GL_FALSE, sizeof(glimac::ShapeVertex), (const GLvoid*)offsetof(glimac::ShapeVertex, texCoords));
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
 
     // On récupère tout les détails dans les shaders (lumiere, position, normale, texture et matrice) pou les envoyer dans la boucle de rendu
     GLuint uMVPMatrixLocation      = glGetUniformLocation(shader.id(), "uMVPMatrix");
@@ -103,6 +70,7 @@ int main()
     GLuint uShininessLocation      = glGetUniformLocation(shader.id(), "uShininess");
     GLuint uLightPos_vsLocation    = glGetUniformLocation(shader.id(), "uLightPos_vs");
     GLuint uLightIntensityLocation = glGetUniformLocation(shader.id(), "uLightIntensity");
+    GLuint textureLocation         = glGetUniformLocation(shader.id(), "uTexture");
 
     glEnable(GL_DEPTH_TEST);
 
@@ -132,22 +100,22 @@ int main()
             camera.rotateLeft(-button.position.x);
             camera.rotateUp(button.position.y);
         };
-        // On indique que il faut lire les shaders et tout réadapter a cette frame
+        glClearColor(0.0f, 0.0f, 0.8f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glBindVertexArray(vao);
+        bufferManager1.bindVAO();
         shader.use();
-        // On crée les matrices pour faire tourner l'objet au milieur de l'écran
-        glActiveTexture(GL_TEXTURE0);
+
+        float     scale        = 0.03f;
+        glm::mat4 MVMatrix     = glm::scale(glm::vec3(scale, scale, scale));
+        MVMatrix               = glm::inverse(viewMatrix);
+        MVMatrix               = glm::translate(MVMatrix, glm::vec3(4.0f, -1.0f, -2.0f));
+        MVMatrix               = glm::rotate(MVMatrix, 1.0f, glm::vec3(0.f, 1.f, 0.f));
         glm::mat4 ProjMatrix   = glm::perspective(glm::radians(70.f), ctx.aspect_ratio(), 0.1f, 100.f);
-        glm::mat4 MVMatrix     = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f));
-        MVMatrix               = glm::rotate(MVMatrix, ctx.time(), glm::vec3(0.f, 1.f, 0.f));
         glm::mat4 NormalMatrix = glm::transpose(glm::inverse(MVMatrix));
-        // On S'occupe de la lumière pour qu'elle se comporte comme il faut
-        glm::vec3 lightPos = glm::vec3(glm::rotate(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), ctx.time(), glm::vec3(0.0f, 1.0f, 0.0f)));
+        glm::vec3 lightPos     = glm::vec3(glm::rotate(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), ctx.time(), glm::vec3(0.0f, 1.0f, 0.0f)));
         lightPos *= 5.0f;
         glm::vec3 lightPos_vs = glm::vec3(viewMatrix * glm::vec4(lightPos, 1.0f));
-        // On crée une matrice avec tout les éléments avant pour que l'on puisse la donner propre aux shaders
-        glm::mat4 MVPMatrix = ProjMatrix * viewMatrix * MVMatrix;
+        glm::mat4 MVPMatrix   = ProjMatrix * viewMatrix * MVMatrix;
         // On envoie toute les viarables uniformes qu'on a crée ligne 97 pour que les shaders puissent les utiliser et avoir tout qui fonctionne super
         glUniformMatrix4fv(uMVPMatrixLocation, 1, GL_FALSE, glm::value_ptr(MVPMatrix));
         glUniformMatrix4fv(uMVMatrixLocation, 1, GL_FALSE, glm::value_ptr(MVMatrix));
@@ -156,20 +124,35 @@ int main()
         glUniform3f(uKsLocation, 0.8f, 0.8f, 0.8f);                         // Example values for specular reflectivity
         glUniform1f(uShininessLocation, 32.0f);                             // Example value for shininess
         glUniform3fv(uLightPos_vsLocation, 1, glm::value_ptr(lightPos_vs)); // Send transformed light position
-        glUniform3f(uLightIntensityLocation, 1.0f, 1.0f, 1.0f);             // Example values for light intensity
-        // On dessine le poisson
-        glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-        // On nettoie tout pour que tout soit propre et que il y a pas des textures qui se mélangent ou restent dans la mémoire
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture unit GL_TEXTURE0
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture unit GL_TEXTURE1
-        glBindVertexArray(0);
+        glUniform3f(uLightIntensityLocation, 1.0f, 1.0f, 1.0f);
+        glUniform1i(textureLocation, 0); // Example values for light intensity
+                                         // On dessine le poisson
+        glDrawArrays(GL_TRIANGLES, 0, vertices1.size());
+        bufferManager1.unbindVAO();
+
+        bufferManager2.bindVAO();
+        // Position the second model and scale it by 10x
+        glm::mat4 secondModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, -5.0f)); // Translate the model
+        secondModelMatrix           = glm::scale(secondModelMatrix, glm::vec3(5.0f, 5.0f, 5.0f));    // Scale the model by a factor of 10
+        glm::mat4 secondMVPMatrix   = ProjMatrix * viewMatrix * secondModelMatrix;                   // Calculate the Model-View-Projection Matrix
+        glUniformMatrix4fv(uMVPMatrixLocation, 1, GL_FALSE, glm::value_ptr(secondMVPMatrix));        // Set the MVP matrix uniform
+        glDrawArrays(GL_TRIANGLES, 0, vertices2.size());                                             // Draw the model
+        bufferManager2.unbindVAO();
+
+        bufferManager4.bindVAO();
+        float     rotationAngle = ctx.time();                                                               // This returns the time in seconds, causing continuous rotation
+        glm::mat4 Rotate        = glm::rotate(glm::mat4(1.0f), rotationAngle, glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate around Y-axis
+        glm::mat4 Translate     = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));             // Adjust position as needed
+        glm::mat4 Scale         = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));                             // Adjust scale as needed
+        glm::mat4 MVMatrix4     = Translate * Rotate * Scale;
+        glm::mat4 MVPMatrix4    = ProjMatrix * viewMatrix * MVMatrix4;
+        glUniformMatrix4fv(uMVPMatrixLocation, 1, GL_FALSE, glm::value_ptr(MVPMatrix4));
+        glDrawArrays(GL_TRIANGLES, 0, vertices4.size());
+        bufferManager4.unbindVAO();
     };
 
     // Ca c'est pour démarre la boucle de rendu et la fermer proprement
     ctx.start();
-    glDeleteBuffers(1, &vbo);
-    glDeleteVertexArrays(1, &vao);
+
     return EXIT_SUCCESS;
 }

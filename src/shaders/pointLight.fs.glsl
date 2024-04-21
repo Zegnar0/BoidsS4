@@ -12,6 +12,8 @@ uniform float uShininess;
 uniform vec3 uLightPos_vs;
 uniform vec3 uLightIntensity;
 
+uniform sampler2D uTexture;
+
 vec3 blinnPhong(){
     // normalisation des vecteurs
     vec3 N = normalize(vNormal_vs);
@@ -34,6 +36,7 @@ vec3 blinnPhong(){
 
 void main() {
 
+    vec4 texture1 = texture(uTexture, vTexCoords);
 
-    fFragColor = vec4(blinnPhong(), 1.0);
+    fFragColor = texture1*vec4(blinnPhong(), 1.0);
 }

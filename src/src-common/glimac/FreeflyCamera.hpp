@@ -1,5 +1,4 @@
-#ifndef FREEFLYCAMERA_HPP
-#define FREEFLYCAMERA_HPP
+#pragma once
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -14,56 +13,15 @@ private:
     glm::vec3 m_LeftVector;
     glm::vec3 m_UpVector;
 
-    void computeDirectionVectors()
-    {
-        m_FrontVector = glm::vec3(
-            cos(m_Theta) * sin(m_Phi),
-            sin(m_Theta),
-            cos(m_Theta) * cos(m_Phi)
-        );
-
-        m_LeftVector = glm::vec3(
-            sin(m_Phi + glm::pi<float>() / 2.0f),
-            0,
-            cos(m_Phi + glm::pi<float>() / 2.0f)
-        );
-
-        m_UpVector = glm::cross(m_FrontVector, m_LeftVector);
-    }
+    void computeDirectionVectors();
 
 public:
-    FreeflyCamera()
-        : m_Position(glm::vec3(0.0f)), m_Phi(glm::pi<float>()), m_Theta(0.0f)
-    {
-        computeDirectionVectors();
-    }
+    FreeflyCamera();
 
-    void moveLeft(float t)
-    {
-        m_Position += t * m_LeftVector;
-    }
+    void moveLeft(float t);
+    void moveFront(float t);
+    void rotateLeft(float degrees);
+    void rotateUp(float degrees);
 
-    void moveFront(float t)
-    {
-        m_Position += t * m_FrontVector;
-    }
-
-    void rotateLeft(float degrees)
-    {
-        m_Phi += glm::radians(degrees);
-        computeDirectionVectors();
-    }
-
-    void rotateUp(float degrees)
-    {
-        m_Theta += glm::radians(degrees);
-        computeDirectionVectors();
-    }
-
-    glm::mat4 getViewMatrix() const
-    {
-        return glm::lookAt(m_Position, m_Position + m_FrontVector, m_UpVector);
-    }
+    glm::mat4 getViewMatrix() const;
 };
-
-#endif // FREEFLYCAMERA_HPP
