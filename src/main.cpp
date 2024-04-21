@@ -68,7 +68,7 @@ int main()
     BufferManager bufferManager5;
     bufferManager5.createBuffers(vertices5);
 
-    auto          vertices6 = loadModel("../Models/RequinReduced.obj");
+     auto          vertices6 = loadModel("../Models/RequinReduced.obj");
     BufferManager bufferManager6;
     bufferManager6.createBuffers(vertices6);
 
