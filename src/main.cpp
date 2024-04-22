@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <glm/gtc/random.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "boids.hpp"
 #include "boidsManager.hpp"
 #include "p6/p6.h"
 #include "parameters.hpp"
@@ -20,8 +21,8 @@ int main()
     FreeflyCamera camera;
     // Init des Shaders
     const p6::Shader shader = p6::load_shader(
-        "shaders/3D.vs.glsl",
-        "shaders/pointLight.fs.glsl"
+        "../src/shaders/3D.vs.glsl",
+        "../src/shaders/pointLight.fs.glsl"
     );
 
     // Initialisation des paramètres
@@ -68,7 +69,7 @@ int main()
     BufferManager bufferManager5;
     bufferManager5.createBuffers(vertices5);
 
-     auto          vertices6 = loadModel("../Models/RequinReduced.obj");
+    auto          vertices6 = loadModel("../Models/RequinReduced.obj");
     BufferManager bufferManager6;
     bufferManager6.createBuffers(vertices6);
 
@@ -107,7 +108,7 @@ int main()
     GLuint uShininessLocation      = glGetUniformLocation(shader.id(), "uShininess");
     GLuint uLightPos_vsLocation    = glGetUniformLocation(shader.id(), "uLightPos_vs");
     GLuint uLightIntensityLocation = glGetUniformLocation(shader.id(), "uLightIntensity");
-    GLuint textureLocation         = glGetUniformLocation(shader.id(), "uTexture");
+    GLuint utextureLocation        = glGetUniformLocation(shader.id(), "uTexture");
 
     glEnable(GL_DEPTH_TEST);
 
@@ -152,6 +153,7 @@ int main()
         {
             bufferManager1.bindVAO();
             shader.use();
+            glBindTexture(GL_TEXTURE_2D, triforceTexture);
 
             float     scale        = 0.03f;
             glm::mat4 MVMatrix     = glm::scale(glm::vec3(scale, scale, scale));
@@ -173,8 +175,8 @@ int main()
             glUniform1f(uShininessLocation, 32.0f);                             // Example value for shininess
             glUniform3fv(uLightPos_vsLocation, 1, glm::value_ptr(lightPos_vs)); // Send transformed light position
             glUniform3f(uLightIntensityLocation, 1.0f, 1.0f, 1.0f);
-            glUniform1i(textureLocation, 0); // Example values for light intensity
-                                             // On dessine le poisson
+            glUniform1i(utextureLocation, 0); // Example values for light intensity
+                                              // On dessine le poisson
             glDrawArrays(GL_TRIANGLES, 0, vertices1.size());
             bufferManager1.unbindVAO();
 
@@ -196,14 +198,17 @@ int main()
             bufferManager3.unbindVAO();
 
             bufferManager4.bindVAO();
-            float     rotationAngle = ctx.time();                                                               // This returns the time in seconds, causing continuous rotation
-            glm::mat4 Rotate        = glm::rotate(glm::mat4(1.0f), rotationAngle, glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate around Y-axis
-            glm::mat4 Translate     = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));             // Adjust position as needed
-            glm::mat4 Scale         = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));                             // Adjust scale as needed
-            glm::mat4 MVMatrix4     = Translate * Rotate * Scale;
-            glm::mat4 MVPMatrix4    = ProjMatrix * viewMatrix * MVMatrix4;
-            glUniformMatrix4fv(uMVPMatrixLocation, 1, GL_FALSE, glm::value_ptr(MVPMatrix4));
-            glDrawArrays(GL_TRIANGLES, 0, vertices4.size());
+            const auto& boids = boidsManager.getBoids();
+            for (const Boids& boid : boids)
+            {
+                glm::vec3 pos        = boid.getPosition();
+                glm::mat4 Translate  = glm::translate(glm::mat4(1.0f), pos);         // Adjust position as needed
+                glm::mat4 Scale      = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)); // Adjust scale as needed
+                glm::mat4 MVMatrix4  = Translate * Scale;
+                glm::mat4 MVPMatrix4 = ProjMatrix * viewMatrix * MVMatrix4;
+                glUniformMatrix4fv(uMVPMatrixLocation, 1, GL_FALSE, glm::value_ptr(MVPMatrix4));
+                glDrawArrays(GL_TRIANGLES, 0, vertices4.size());
+            }
             bufferManager4.unbindVAO();
         }
         else
@@ -231,8 +236,8 @@ int main()
             glUniform1f(uShininessLocation, 32.0f);                             // Example value for shininess
             glUniform3fv(uLightPos_vsLocation, 1, glm::value_ptr(lightPos_vs)); // Send transformed light position
             glUniform3f(uLightIntensityLocation, 1.0f, 1.0f, 1.0f);
-            glUniform1i(textureLocation, 0); // Example values for light intensity
-                                             // On dessine le poisson
+            glUniform1i(utextureLocation, 0); // Example values for light intensity
+                                              // On dessine le poisson
             glDrawArrays(GL_TRIANGLES, 0, vertices1.size());
             bufferManager6.unbindVAO();
 
@@ -246,14 +251,17 @@ int main()
             bufferManager2.unbindVAO();
 
             bufferManager5.bindVAO();
-            float     rotationAngle = ctx.time();                                                               // This returns the time in seconds, causing continuous rotation
-            glm::mat4 Rotate        = glm::rotate(glm::mat4(1.0f), rotationAngle, glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate around Y-axis
-            glm::mat4 Translate     = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));             // Adjust position as needed
-            glm::mat4 Scale         = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));                             // Adjust scale as needed
-            glm::mat4 MVMatrix4     = Translate * Rotate * Scale;
-            glm::mat4 MVPMatrix4    = ProjMatrix * viewMatrix * MVMatrix4;
-            glUniformMatrix4fv(uMVPMatrixLocation, 1, GL_FALSE, glm::value_ptr(MVPMatrix4));
-            glDrawArrays(GL_TRIANGLES, 0, vertices4.size());
+            const auto& boids = boidsManager.getBoids();
+            for (const Boids& boid : boids)
+            {
+                glm::vec3 pos        = boid.getPosition();
+                glm::mat4 Translate  = glm::translate(glm::mat4(1.0f), pos);         // Adjust position as needed
+                glm::mat4 Scale      = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)); // Adjust scale as needed
+                glm::mat4 MVMatrix4  = Translate * Scale;
+                glm::mat4 MVPMatrix4 = ProjMatrix * viewMatrix * MVMatrix4;
+                glUniformMatrix4fv(uMVPMatrixLocation, 1, GL_FALSE, glm::value_ptr(MVPMatrix4));
+                glDrawArrays(GL_TRIANGLES, 0, vertices4.size());
+            }
             bufferManager5.unbindVAO();
 
             bufferManager7.bindVAO();

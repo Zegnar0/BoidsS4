@@ -17,6 +17,7 @@ public:
     static glm::vec3 averageVelocity(const std::vector<glm::vec3>& velocities);
     void             updateBoids(Parameters param, const Boids& other_boid, std::vector<Boids>& nearby_boids_alignment, std::vector<Boids>& nearby_boids_separation, std::vector<Boids>& nearby_boids_cohesion);
     void             drawBoids(const Parameters& param, p6::Context* ctx);
+    glm::vec3        getPosition() const;
     // void             drawBoids(const Parameters& param, p6::Context* ctx, const std::vector<BoidsModel>& boidsModels);
 
 private:

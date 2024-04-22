@@ -12,9 +12,10 @@ public:
     explicit BoidsManager(const Parameters& params);
     ~BoidsManager();
 
-    void randomInitBoids();
-    void update(p6::Context* ctx, const Parameters& params);
-    void loadBoidsModel();
+    void                      randomInitBoids();
+    void                      update(p6::Context* ctx, const Parameters& params);
+    void                      loadBoidsModel();
+    const std::vector<Boids>& getBoids() const;
 
 private:
     std::vector<Boids> boids{10};

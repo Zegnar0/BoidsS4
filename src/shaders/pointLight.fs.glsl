@@ -36,7 +36,7 @@ vec3 blinnPhong(){
 
 void main() {
 
-    vec4 texture1 = texture(uTexture, vTexCoords);
+    vec4 color = texture(uTexture, vTexCoords);
 
-    fFragColor = texture1*vec4(blinnPhong(), 1.0);
+    fFragColor = vec4(blinnPhong(), 1.0);
 }

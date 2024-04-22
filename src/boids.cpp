@@ -43,7 +43,7 @@ void Boids::updateBoids(Parameters param, const Boids& other_boid, std::vector<B
     if (&other_boid != this)
     {
         float dist = distance(*this, other_boid);
-        // Alignement
+        // Alignment
         if (dist < param.alignmentRadius)
         {
             nearby_boids_alignment.push_back(other_boid);
@@ -115,33 +115,39 @@ void Boids::drawBoids(const Parameters& param, p6::Context* ctx)
 
     position = position + velocity * ctx->delta_time();
 
-    if (position.x > ctx->aspect_ratio())
+    if (position.x > 15)
     {
-        position = glm::vec3(-ctx->aspect_ratio(), position.y, position.z);
+        position = glm::vec3(-15, position.y, position.z);
     }
-    else if (position.x < -ctx->aspect_ratio())
+    else if (position.x < -15)
     {
-        position = glm::vec3(ctx->aspect_ratio(), position.y, position.z);
+        position = glm::vec3(15, position.y, position.z);
     }
-    if (position.y > 1)
+    if (position.y > 15)
     {
-        position = glm::vec3(position.x, -1, position.z);
+        position = glm::vec3(position.x, -15, position.z);
     }
-    else if (position.y < -1)
+    else if (position.y < -15)
     {
-        position = glm::vec3(position.x, 1, position.z);
+        position = glm::vec3(position.x, 15, position.z);
     }
-    if (position.z > 1)
+    if (position.z > 15)
     {
-        position = glm::vec3(position.x, position.y, -1);
+        position = glm::vec3(position.x, position.y, -15);
     }
-    else if (position.z < -1)
+    else if (position.z < -15)
     {
-        position = glm::vec3(position.x, position.y, 1);
+        position = glm::vec3(position.x, position.y, 15);
     }
 
-    ctx->translate({position});
-    ctx->fill = {1, 0, 0, 0.5};
-    ctx->equilateral_triangle(p6::Center{}, param.triangleRadius);
+    // ctx->translate({position});
+    // ctx->fill = {1, 0, 0, 0.5};
+    // ctx->equilateral_triangle(p6::Center{}, param.triangleRadius);
+
     // const std::vector<glimac::ShapeVertex> vertices = glimac::sphere_vertices(1.f, 32, 16);
+}
+
+glm::vec3 Boids::getPosition() const
+{
+    return position;
 }
