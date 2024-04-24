@@ -1,8 +1,8 @@
 #version 330
 
 in vec2 vTexCoords;
-in vec3 vPosition_vs; // Position du sommet transformée dans l'espace View (vs)
-in vec3 vNormal_vs; // Normale du sommet transformée dans l'espace View (vs)
+in vec3 vPosition_vs; 
+in vec3 vNormal_vs; 
 
 out vec4 fFragColor;
 
@@ -11,25 +11,40 @@ uniform vec3 uKs;
 uniform float uShininess;
 uniform vec3 uLightPos_vs;
 uniform vec3 uLightIntensity;
+uniform vec3 uLightPos2_vs;
+uniform vec3 uLightIntensity2;
+
 
 uniform sampler2D uTexture;
 
 vec3 blinnPhong(){
-    // normalisation des vecteurs
     vec3 N = normalize(vNormal_vs);
-    vec3 L = normalize(uLightPos_vs - vPosition_vs);
     vec3 V = normalize(-vPosition_vs);
-    vec3 H = normalize(L + V);
 
-    // calcul des facteurs
-    float NdotL = max(0.0, dot(N, L));
-    float NdotH = max(0.0, dot(N, H));
+    vec3 color = vec3(0.0); 
 
-    // calcul de l'éclairement spéculaire
-    vec3 color = uKd * NdotL * uLightIntensity;
+    
+    vec3 lightPositions[2];
+    vec3 lightIntensities[2];
 
-    // calcul de l'éclairement diffus
-    color += uKs * pow(NdotH, uShininess) * uLightIntensity;
+    
+    lightPositions[0] = uLightPos_vs;
+    lightPositions[1] = uLightPos2_vs;
+    lightIntensities[0] = uLightIntensity;
+    lightIntensities[1] = uLightIntensity2;
+
+    for (int i = 0; i < 2; i++) {
+        vec3 L = normalize(lightPositions[i] - vPosition_vs);
+        vec3 H = normalize(L + V);
+        
+        
+        float NdotL = max(0.0, dot(N, L));
+        color += uKd * NdotL * lightIntensities[i];
+
+       
+        float NdotH = max(0.0, dot(N, H));
+        color += uKs * pow(NdotH, uShininess) * lightIntensities[i];
+    }
 
     return color;
 }

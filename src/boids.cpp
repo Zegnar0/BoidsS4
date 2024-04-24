@@ -2,7 +2,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/random.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "../src/src-common/glimac/sphere_vertices.hpp"
+// #include "../src/src-common/glimac/sphere_vertices.hpp"
 #include "p6/p6.h"
 
 // Initialisation
@@ -111,33 +111,34 @@ void Boids::updateBoids(Parameters param, const Boids& other_boid, std::vector<B
 // Dessin des boids
 void Boids::drawBoids(const Parameters& param, p6::Context* ctx)
 {
-    const auto sg1 = ctx->transform_scope_guard();
+    const auto sg1       = ctx->transform_scope_guard();
+    float      distanced = 15;
 
     position = position + velocity * ctx->delta_time();
 
-    if (position.x > 15)
+    if (position.x > distanced)
     {
-        position = glm::vec3(-15, position.y, position.z);
+        position = glm::vec3(-distanced, position.y, position.z);
     }
-    else if (position.x < -15)
+    else if (position.x < -distanced)
     {
-        position = glm::vec3(15, position.y, position.z);
+        position = glm::vec3(distanced, position.y, position.z);
     }
-    if (position.y > 15)
+    if (position.y > distanced)
     {
-        position = glm::vec3(position.x, -15, position.z);
+        position = glm::vec3(position.x, -distanced, position.z);
     }
-    else if (position.y < -15)
+    else if (position.y < -distanced)
     {
-        position = glm::vec3(position.x, 15, position.z);
+        position = glm::vec3(position.x, distanced, position.z);
     }
-    if (position.z > 15)
+    if (position.z > distanced)
     {
-        position = glm::vec3(position.x, position.y, -15);
+        position = glm::vec3(position.x, position.y, -distanced);
     }
-    else if (position.z < -15)
+    else if (position.z < -distanced)
     {
-        position = glm::vec3(position.x, position.y, 15);
+        position = glm::vec3(position.x, position.y, distanced);
     }
 
     // ctx->translate({position});

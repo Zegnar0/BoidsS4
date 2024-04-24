@@ -1,4 +1,3 @@
-// BufferManager.cpp
 #include "BufferManager.hpp"
 
 BufferManager::BufferManager()

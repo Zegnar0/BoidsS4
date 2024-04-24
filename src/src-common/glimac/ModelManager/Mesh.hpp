@@ -3,9 +3,9 @@
 #include <glm/gtc/random.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "p6/p6.h"
-#include "src-common/glimac/FreeflyCamera.hpp"
-#include "src-common/glimac/ModelLoader.hpp"
-#include "src-common/glimac/common.hpp"
+#include "src-common/glimac/Camera/FreeflyCamera.hpp"
+#include "src-common/glimac/ModelManager/ModelLoader.hpp"
+#include "src-common/glimac/ModelManager/common.hpp"
 
 class Mesh {
 public:

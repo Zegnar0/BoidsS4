@@ -1,5 +1,5 @@
 #include "Mesh.hpp"
-#include <cstddef> // For offsetof
+#include <cstddef>
 
 Mesh::Mesh(const std::vector<glimac::ShapeVertex>& vertices)
     : _vertexCount(static_cast<GLsizei>(vertices.size()))
@@ -45,5 +45,4 @@ GLsizei Mesh::vertexCount() const
 
 void Mesh::setupMesh(const std::vector<glimac::ShapeVertex>& vertices)
 {
-    // Could contain additional setup logic if needed
 }

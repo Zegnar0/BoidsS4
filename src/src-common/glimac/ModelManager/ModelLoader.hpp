@@ -1,4 +1,3 @@
-// ModelLoader.hpp
 #pragma once
 
 #include <string>

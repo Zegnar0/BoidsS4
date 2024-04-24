@@ -1,7 +1,6 @@
-// BufferManager.hpp
 #pragma once
 #include <vector>
-#include "common.hpp" // Adjust the path according to your project structure
+#include "common.hpp"
 #include "p6/p6.h"
 
 class BufferManager {

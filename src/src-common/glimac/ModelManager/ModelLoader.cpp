@@ -1,4 +1,3 @@
-// ModelLoader.cpp
 #include "ModelLoader.hpp"
 #include <iostream>
 #include "tiny_obj_loader.h"
@@ -6,7 +5,6 @@
 std::vector<glimac::ShapeVertex> loadModel(const std::string& filePath)
 {
     tinyobj::ObjReaderConfig readerConfig;
-    readerConfig.mtl_search_path = "../Models/"; // Set the path for material files
 
     tinyobj::ObjReader reader;
     if (!reader.ParseFromFile(filePath, readerConfig))
@@ -48,7 +46,7 @@ std::vector<glimac::ShapeVertex> loadModel(const std::string& filePath)
             }
             else
             {
-                vertex.normal = glm::vec3(0, 0, 0); // Default normal if none are provided
+                vertex.normal = glm::vec3(0, 0, 0);
             }
 
             vertices.push_back(vertex);
