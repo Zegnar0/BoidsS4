@@ -2,7 +2,7 @@
 #define BOIDS_HPP
 #include <glm/vec2.hpp>
 #include <vector>
-// #include "boidsModel.hpp"
+#include "BoidsMarkovState.hpp"
 #include "p6/p6.h"
 #include "parameters.hpp"
 

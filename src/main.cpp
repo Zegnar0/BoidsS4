@@ -1,3 +1,4 @@
+
 #include <cmath>
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <cstddef>
@@ -12,6 +13,7 @@
 #include "src-common/glimac/default_shader.hpp"
 #include "src-common/glimac/sphere_vertices.hpp"
 #include "tiny_obj_loader.h"
+
 
 int main()
 {
@@ -38,6 +40,58 @@ int main()
     // Initialisation de BoidsManager
     BoidsManager boidsManager(parameters);
     boidsManager.randomInitBoids();
+
+    // Initialisation de la graine pour la fonction rand()
+    srand(time(nullptr));
+
+    // Exemples d'utilisation des fonctions
+    // std::cout << "Loi uniforme continue : " << uniforme_continue() << std::endl;
+    // std::cout << "Loi normale : " << normale(0, 1) << std::endl;
+    // std::cout << "Loi exponentielle : " << exponentielle(1) << std::endl;
+    // std::cout << "Loi binomiale : " << binomiale(10, 0.5) << std::endl;
+    // std::cout << "Loi uniforme discrete : " << uniforme_discrete(0, 10) << std::endl;
+    // std::cout << "Loi de Poisson : " << poisson(3) << std::endl;
+    // std::cout << "Loi de Bernoulli : " << bernoulli(0.3) << std::endl;
+    // std::cout << "Loi triangulaire : " << triangulaire(0, 10) << std::endl;
+
+    // double p = 0.3;
+    // std::cout << "Bernoulli : " << bernoulli(p) << std::endl;
+
+    // int n     = 10;
+    // int binom = binomiale(n, p);
+    // std::cout << "Binomiale : " << binom << std::endl;
+
+    // int N = 20, K = 10;
+    // int hyperg = hypergeometrique(N, K, n);
+    // std::cout << "Hypergeometrique : " << hyperg << std::endl;
+
+    // double probs[] = {0.2, 0.3, 0.5};
+    // int    samples[3];
+    // multinomiale(3, probs, samples);
+    // std::cout << "Multinomiale : ";
+    // for (int i = 0; i < 3; ++i)
+    // {
+    //     std::cout << samples[i] << " ";
+    // }
+    // std::cout << std::endl;
+
+    // int a = 5, b = 10;
+    // std::cout << "Uniforme : " << uniforme(a, b) << std::endl;
+
+    // std::cout << "Loi uniforme discrete : " << uniforme_discrete(0, 10) << std::endl;
+
+    // // Exemple d 'utilisation de la fonction d' indépendance double p = 0.6;
+    // std::cout << "Indépendance : " << independance(p) << std::endl;
+
+    // // Exemple d'utilisation de la fonction des permutations
+    // int              m    = 5;
+    // std::vector<int> perm = permutations(m);
+    // std::cout << "Permutations : ";
+    // for (int i = 0; i < m; ++i)
+    // {
+    //     std::cout << perm[i] << " ";
+    // }
+    // std::cout << std::endl;
 
     // Création du VBO
     GLuint vbo;
