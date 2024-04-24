@@ -1,5 +1,5 @@
 #pragma once
-#include <glm/glm.hpp> // Ensure you have the GLM library available
+#include <glm/glm.hpp>
 
 struct Parameters {
     float triangleRadius   = 0.1f;
@@ -15,7 +15,6 @@ struct Parameters {
         min_separation_distance = triangleRadius * 2.f;
     }
 
-    // Function to draw/edit parameters using ImGui
     void drawImGui();
 };
 

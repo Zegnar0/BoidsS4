@@ -1,5 +1,4 @@
-#ifndef BOIDS_HPP
-#define BOIDS_HPP
+#pragma once
 #include <glm/vec2.hpp>
 #include <vector>
 // #include "boidsModel.hpp"
@@ -24,5 +23,3 @@ private:
     glm::vec3 position;
     glm::vec3 velocity;
 };
-
-#endif // BOIDS_HPP

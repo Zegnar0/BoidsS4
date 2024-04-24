@@ -24,6 +24,7 @@ BoidState BoidsMarkovState::updateState()
     double cumulativeProbability = 0.0;
     for (int nextState = 0; nextState < NUM_STATES; ++nextState)
     {
+        // std::cout << "currentState: " << currentState << " nextState: " << nextState << std::endl;
         cumulativeProbability += transitionMatrix_[currentState][nextState];
         if (randomNum < cumulativeProbability)
         {

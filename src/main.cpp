@@ -9,6 +9,7 @@
 #include "parameters.hpp"
 #include "src-common/glimac/Camera/FreeflyCamera.hpp"
 #include "src-common/glimac/Input/InputManager.hpp"
+#include "src-common/glimac/Math/Math.hpp"
 #include "src-common/glimac/ModelManager/BufferManager.hpp"
 #include "src-common/glimac/ModelManager/ModelLoader.hpp"
 // #include "src-common/glimac/Texture.hpp"
@@ -17,7 +18,7 @@ int main()
 {
     auto ctx = p6::Context{{1280, 720, "Boids3D"}};
     ctx.maximize_window();
-
+    // Init Camera et input
     FreeflyCamera camera;
     InputManager  inputManager(ctx, camera);
 
@@ -26,10 +27,12 @@ int main()
         "../src/shaders/pointLight.fs.glsl"
     );
 
+    // Init Parametre et Boids
     Parameters   parameters = getData();
     BoidsManager boidsManager(parameters);
     boidsManager.randomInitBoids();
 
+    // Chargement de Tout les modèles
     auto          Requin = loadModel("../Models/Requin.obj");
     BufferManager bufferManager1;
     bufferManager1.createBuffers(Requin);
@@ -57,33 +60,36 @@ int main()
     auto          starworkLod = loadModel("../Models/starReduced.obj");
     BufferManager bufferManager7;
     bufferManager7.createBuffers(starworkLod);
+    // Essai de texture mais ca marche pas
+    //  Texture fishTexture("test");
 
-    // Texture fishTexture("test");
-
-    GLuint uMVPMatrixLocation      = glGetUniformLocation(shader.id(), "uMVPMatrix");
-    GLuint uMVMatrixLocation       = glGetUniformLocation(shader.id(), "uMVMatrix");
-    GLuint uNormalMatrixLocation   = glGetUniformLocation(shader.id(), "uNormalMatrix");
-    GLuint uKdLocation             = glGetUniformLocation(shader.id(), "uKd");
-    GLuint uKsLocation             = glGetUniformLocation(shader.id(), "uKs");
-    GLuint uShininessLocation      = glGetUniformLocation(shader.id(), "uShininess");
-    GLuint uLightPos_vsLocation    = glGetUniformLocation(shader.id(), "uLightPos_vs");
-    GLuint uLightIntensityLocation = glGetUniformLocation(shader.id(), "uLightIntensity");
-    GLuint utextureLocation        = glGetUniformLocation(shader.id(), "uTexture");
-    // GLuint uLightPos_vsLocation1    = glGetUniformLocation(shader.id(), "uLightPos2_vs");
-    // GLuint uLightIntensityLocation2 = glGetUniformLocation(shader.id(), "uLightIntensity2");
+    // Init des Variables pour les shaders
+    GLuint uMVPMatrixLocation       = glGetUniformLocation(shader.id(), "uMVPMatrix");
+    GLuint uMVMatrixLocation        = glGetUniformLocation(shader.id(), "uMVMatrix");
+    GLuint uNormalMatrixLocation    = glGetUniformLocation(shader.id(), "uNormalMatrix");
+    GLuint uKdLocation              = glGetUniformLocation(shader.id(), "uKd");
+    GLuint uKsLocation              = glGetUniformLocation(shader.id(), "uKs");
+    GLuint uShininessLocation       = glGetUniformLocation(shader.id(), "uShininess");
+    GLuint uLightPos_vsLocation     = glGetUniformLocation(shader.id(), "uLightPos_vs");
+    GLuint uLightIntensityLocation  = glGetUniformLocation(shader.id(), "uLightIntensity");
+    GLuint utextureLocation         = glGetUniformLocation(shader.id(), "uTexture");
+    GLuint uLightPos_vsLocation1    = glGetUniformLocation(shader.id(), "uLightPos2_vs");
+    GLuint uLightIntensityLocation2 = glGetUniformLocation(shader.id(), "uLightIntensity2");
 
     glEnable(GL_DEPTH_TEST);
 
     ctx.update = [&]() {
+        // Mise a jour caméra GUI et Input
         glm::mat4 viewMatrix = camera.getViewMatrix();
         parameters.drawImGui();
         inputManager.update();
 
         glClearColor(0.0f, 0.0f, 0.8f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        // If pour le LOD
         if (parameters.LOD == 0)
         {
+            // Exemple de transformation pour les Models avec bufferManager
             bufferManager1.bindVAO();
             shader.use();
 
@@ -107,9 +113,13 @@ int main()
             glUniform3f(uKdLocation, 0.6f, 0.2f, 0.3f);
             glUniform3f(uKsLocation, 0.8f, 0.8f, 0.8f);
             glUniform1f(uShininessLocation, 32.0f);
+            glUniform1i(utextureLocation, 0);
+            // Les Lumières
             glUniform3fv(uLightPos_vsLocation, 1, glm::value_ptr(lightPos_vs));
             glUniform3f(uLightIntensityLocation, 1.0f, 1.0f, 1.0f);
-            glUniform1i(utextureLocation, 0);
+
+            glUniform3f(uLightPos_vsLocation1, 10.f, -10.0f, 0.0f);
+            glUniform3f(uLightIntensityLocation2, 0.0f, 0.0f, 12.0f);
 
             glDrawArrays(GL_TRIANGLES, 0, Requin.size());
 
@@ -125,11 +135,32 @@ int main()
             bufferManager2.unbindVAO();
 
             bufferManager3.bindVAO();
-            glm::mat4 thirdModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, -15.0f, -5.0f));
-            thirdModelMatrix           = glm::scale(thirdModelMatrix, glm::vec3(5.0f, 5.0f, 5.0f));
-            glm::mat4 thirdMVPMatrix   = ProjMatrix * viewMatrix * thirdModelMatrix;
-            glUniformMatrix4fv(uMVPMatrixLocation, 1, GL_FALSE, glm::value_ptr(thirdMVPMatrix));
-            glDrawArrays(GL_TRIANGLES, 0, Starwork.size());
+            // La Boucle pour les Décors en grille
+            int   numRows    = 5;
+            int   numColumns = 5;
+            float spacingX   = 10.0f;
+            float spacingY   = 10.0f;
+
+            std::vector<glm::mat4> starworkTransforms(numRows * numColumns);
+
+            for (int row = 0; row < numRows; ++row)
+            {
+                for (int col = 0; col < numColumns; ++col)
+                {
+                    float xPosition           = col * spacingX;
+                    float yPosition           = row * -spacingY;
+                    int   index               = row * numColumns + col;
+                    starworkTransforms[index] = glm::translate(glm::mat4(1.0f), glm::vec3(20 + yPosition, -25.0f, -20 + xPosition));
+                    starworkTransforms[index] = glm::scale(starworkTransforms[index], glm::vec3(5.0f, 5.0f, 5.0f));
+                }
+            }
+
+            for (const auto& transform : starworkTransforms)
+            {
+                glm::mat4 MVPMatrix = ProjMatrix * viewMatrix * transform;
+                glUniformMatrix4fv(uMVPMatrixLocation, 1, GL_FALSE, glm::value_ptr(MVPMatrix));
+                glDrawArrays(GL_TRIANGLES, 0, Starwork.size());
+            }
             bufferManager3.unbindVAO();
 
             bufferManager4.bindVAO();
@@ -147,6 +178,7 @@ int main()
             bufferManager4.unbindVAO();
         }
         else
+        // Le Lod 1
         {
             bufferManager6.bindVAO();
             shader.use();
@@ -171,6 +203,8 @@ int main()
             glUniform1f(uShininessLocation, 32.0f);
             glUniform3fv(uLightPos_vsLocation, 1, glm::value_ptr(lightPos_vs));
             glUniform3f(uLightIntensityLocation, 1.0f, 1.0f, 1.0f);
+            glUniform3f(uLightPos_vsLocation1, 10.f, -10.0f, 0.0f);
+            glUniform3f(uLightIntensityLocation2, 0.0f, 0.0f, 12.0f);
 
             glDrawArrays(GL_TRIANGLES, 0, Requin.size());
 
@@ -200,14 +234,35 @@ int main()
             bufferManager5.unbindVAO();
 
             bufferManager7.bindVAO();
-            glm::mat4 thirdModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, -15.0f, -5.0f));
-            thirdModelMatrix           = glm::scale(thirdModelMatrix, glm::vec3(5.0f, 5.0f, 5.0f));
-            glm::mat4 thirdMVPMatrix   = ProjMatrix * viewMatrix * thirdModelMatrix;
-            glUniformMatrix4fv(uMVPMatrixLocation, 1, GL_FALSE, glm::value_ptr(thirdMVPMatrix));
-            glDrawArrays(GL_TRIANGLES, 0, starworkLod.size());
+
+            int   numRows    = 5;
+            int   numColumns = 5;
+            float spacingX   = 10.0f;
+            float spacingY   = 10.0f;
+
+            std::vector<glm::mat4> starworkTransforms(numRows * numColumns);
+
+            for (int row = 0; row < numRows; ++row)
+            {
+                for (int col = 0; col < numColumns; ++col)
+                {
+                    float xPosition           = col * spacingX;
+                    float yPosition           = row * -spacingY;
+                    int   index               = row * numColumns + col;
+                    starworkTransforms[index] = glm::translate(glm::mat4(1.0f), glm::vec3(20 + yPosition, -25.0f, -20 + xPosition));
+                    starworkTransforms[index] = glm::scale(starworkTransforms[index], glm::vec3(5.0f, 5.0f, 5.0f));
+                }
+            }
+
+            for (const auto& transform : starworkTransforms)
+            {
+                glm::mat4 MVPMatrix = ProjMatrix * viewMatrix * transform;
+                glUniformMatrix4fv(uMVPMatrixLocation, 1, GL_FALSE, glm::value_ptr(MVPMatrix));
+                glDrawArrays(GL_TRIANGLES, 0, starworkLod.size());
+            }
             bufferManager7.unbindVAO();
         }
-
+        // Update des Boids a la fin
         boidsManager.update(&ctx, parameters);
     };
 

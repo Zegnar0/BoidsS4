@@ -12,7 +12,7 @@ std::vector<glimac::ShapeVertex> loadModel(const std::string& filePath)
         if (!reader.Error().empty())
         {
             std::cerr << "TinyObjReader Error: " << reader.Error();
-            exit(1); // or handle more gracefully
+            exit(1);
         }
     }
 

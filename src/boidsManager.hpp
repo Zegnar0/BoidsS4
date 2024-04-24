@@ -12,7 +12,7 @@ public:
     ~BoidsManager();
 
     void                      randomInitBoids();
-    void                      update(p6::Context* ctx, const Parameters& params);
+    void update(p6::Context* ctx, Parameters& params);
     void                      loadBoidsModel();
     const std::vector<Boids>& getBoids() const;
 
