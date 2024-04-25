@@ -235,10 +235,10 @@ int main()
 
             bufferManager7.bindVAO();
 
-            int   numRows    = 5;
-            int   numColumns = 5;
-            float spacingX   = 10.0f;
-            float spacingY   = 10.0f;
+            int   numRows    = 3;
+            int   numColumns = 3;
+            float spacingX   = 20.0f;
+            float spacingY   = 20.0f;
 
             std::vector<glm::mat4> starworkTransforms(numRows * numColumns);
 
@@ -246,12 +246,14 @@ int main()
             {
                 for (int col = 0; col < numColumns; ++col)
                 {
-                    float xPosition           = col * spacingX;
-                    float yPosition           = row * -spacingY;
-                    int   index               = row * numColumns + col;
-                    starworkTransforms[index] = glm::translate(glm::mat4(1.0f), glm::vec3(20 + yPosition + uniforme_discrete(0, 2), -27.0f + uniforme(0, 2), -20 + xPosition + independance(1500)));
-                    starworkTransforms[index] = glm::scale(starworkTransforms[index], glm::vec3(5.f + bernoulli(0.5) * 5, 5.0f, 5.0f));
-                    // starworkTransforms[index] = glm::rotate(starworkTransforms[index], 1.0f, glm::vec3(0, 0, 0));
+                    float     xPosition       = col * spacingX;
+                    float     yPosition       = row * -spacingY;
+                    int       index           = row * numColumns + col;
+                    const int n               = 4;
+                    double    probs[n]        = {0.1, 0.2, 0.3, 0.4};
+                    starworkTransforms[index] = glm::translate(glm::mat4(1.0f), glm::vec3(22 + yPosition + uniforme_discrete(0, 2), -27.0f + uniforme(0, 2), -25 + xPosition + independance(1500)));
+                    starworkTransforms[index] = glm::scale(starworkTransforms[index], glm::vec3(5.f + bernoulli(0.5) * 5, 5.0f + binomiale(15, 0.2), 5.0f + hypergeometrique(15, 2, 7)));
+                    starworkTransforms[index] = glm::rotate(starworkTransforms[index], 0.1f, glm::vec3(multinomiale(n, probs), 0, 0));
                 }
             }
 

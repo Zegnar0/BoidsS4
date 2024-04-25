@@ -12,7 +12,7 @@ int binomiale(int n, double p);
 int hypergeometrique(int N, int K, int n);
 
 // Fonction pour générer un échantillon aléatoire selon la loi multinomiale
-void multinomiale(int n, const double* probs, int* samples);
+double multinomiale(int n, const double* probs);
 
 // Fonction pour générer un échantillon aléatoire selon la loi uniforme discrète
 int uniforme(int a, int b);

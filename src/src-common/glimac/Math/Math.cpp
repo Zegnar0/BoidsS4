@@ -38,8 +38,7 @@ int hypergeometrique(int N, int K, int n)
     return count;
 }
 
-// Fonction pour générer un échantillon aléatoire selon la loi multinomiale
-void multinomiale(int n, const double* probs, int* samples)
+double multinomiale(int n, const double* probs)
 {
     double sum = 0.0;
     for (int i = 0; i < n; ++i)
@@ -48,24 +47,15 @@ void multinomiale(int n, const double* probs, int* samples)
     }
     double r = (rand() / (double)RAND_MAX) * sum;
     sum      = 0.0;
-    for (int i = 0; i < n - 1; ++i)
+    for (int i = 0; i < n; ++i)
     {
         sum += probs[i];
         if (r < sum)
         {
-            samples[i] = 1;
-            for (int j = i + 1; j < n; ++j)
-            {
-                samples[j] = 0;
-            }
-            return;
+            return i; // Return the index of the selected category
         }
     }
-    samples[n - 1] = 1;
-    for (int i = 0; i < n - 1; ++i)
-    {
-        samples[i] = 0;
-    }
+    return n - 1; // Return the last index if none other was selected before
 }
 
 // Fonction pour générer un échantillon aléatoire selon la loi uniforme discrète
