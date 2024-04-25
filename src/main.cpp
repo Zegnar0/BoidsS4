@@ -252,7 +252,7 @@ int main()
                     const int n               = 4;
                     double    probs[n]        = {0.1, 0.2, 0.3, 0.4};
                     starworkTransforms[index] = glm::translate(glm::mat4(1.0f), glm::vec3(22 + yPosition + uniforme_discrete(0, 2), -27.0f + uniforme(0, 2), -25 + xPosition + independance(1500)));
-                    starworkTransforms[index] = glm::scale(starworkTransforms[index], glm::vec3(5.f + bernoulli(0.5) * 5, 5.0f + binomiale(15, 0.2), 5.0f + hypergeometrique(15, 2, 7)));
+                    starworkTransforms[index] = glm::scale(starworkTransforms[index], glm::vec3(5.f + bernoulli(0.5) * 5, 5.0f + binomiale_continue(15, 0.2), 5.0f + hypergeometrique_continue(15, 2, 7)));
                     starworkTransforms[index] = glm::rotate(starworkTransforms[index], 0.1f, glm::vec3(multinomiale(n, probs), 0, 0));
                 }
             }

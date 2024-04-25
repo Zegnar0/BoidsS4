@@ -6,16 +6,16 @@
 int bernoulli(double p);
 
 // Fonction pour générer un échantillon aléatoire selon la loi binomiale
-int binomiale(int n, double p);
+double binomiale_continue(int n, double p);
 
 // Fonction pour générer un échantillon aléatoire selon la loi hypergéométrique
-int hypergeometrique(int N, int K, int n);
+double hypergeometrique_continue(int N, int K, int n);
 
 // Fonction pour générer un échantillon aléatoire selon la loi multinomiale
 double multinomiale(int n, const double* probs);
 
 // Fonction pour générer un échantillon aléatoire selon la loi uniforme discrète
-int uniforme(int a, int b);
+double uniforme(double a, double b);
 
 // Fonction pour générer un nombre aléatoire suivant une loi uniforme discrète dans une plage [min, max]
 int uniforme_discrete(int min, int max);

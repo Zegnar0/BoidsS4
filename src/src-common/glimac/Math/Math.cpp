@@ -9,31 +9,43 @@ int bernoulli(double p)
 }
 
 // Fonction pour générer un échantillon aléatoire selon la loi binomiale
-int binomiale(int n, double p)
+double binomiale_continue(int n, double p)
 {
-    int count = 0;
+    double count = 0.0;
     for (int i = 0; i < n; ++i)
     {
-        if (bernoulli(p))
+        double r = (double)rand() / RAND_MAX; // Génère un nombre réel aléatoire entre 0 et 1
+        if (r < p)
         {
-            ++count;
+            count += r; // Incrémenter par la valeur aléatoire si elle est inférieure à p
+        }
+        else
+        {
+            count += (1 - r) * (1 - p); // Ajoute une contribution basée sur la partie non favorable
         }
     }
     return count;
 }
 
 // Fonction pour générer un échantillon aléatoire selon la loi hypergéométrique
-int hypergeometrique(int N, int K, int n)
+double hypergeometrique_continue(int N, int K, int n)
 {
-    int count = 0;
+    double count = 0.0;
     for (int i = 0; i < n; ++i)
     {
-        if (rand() % N < K)
+        double random_value = (double)rand() / RAND_MAX;
+        double p            = (double)K / N;
+        if (random_value < p)
         {
-            ++count;
+            count += 1.0;
             --K;
         }
-        --N;
+        else
+        {
+            // Ajouter une fraction basée sur la probabilité inversée
+            count += (1 - p);
+        }
+        --N; // Réduire la taille totale de la population à chaque échantillon
     }
     return count;
 }
@@ -52,16 +64,17 @@ double multinomiale(int n, const double* probs)
         sum += probs[i];
         if (r < sum)
         {
-            return i; // Return the index of the selected category
+            return i;
         }
     }
-    return n - 1; // Return the last index if none other was selected before
+    return n - 1;
 }
 
 // Fonction pour générer un échantillon aléatoire selon la loi uniforme discrète
-int uniforme(int a, int b)
+double uniforme(double a, double b)
 {
-    return a + rand() % (b - a + 1);
+    double random = ((double)rand()) / RAND_MAX;
+    return a + random * (b - a);
 }
 
 // Fonction pour générer un nombre aléatoire suivant une loi uniforme discrète dans une plage [min, max]
@@ -73,7 +86,7 @@ int uniforme_discrete(int min, int max)
 // Fonction pour générer un échantillon aléatoire selon la loi de l'indépendance
 bool independance(double p)
 {
-    return (rand() < p * RAND_MAX);
+    return static_cast<double>(rand()) / RAND_MAX < p;
 }
 
 // // Fonction pour générer un échantillon aléatoire selon la loi des permutations
