@@ -249,8 +249,9 @@ int main()
                     float xPosition           = col * spacingX;
                     float yPosition           = row * -spacingY;
                     int   index               = row * numColumns + col;
-                    starworkTransforms[index] = glm::translate(glm::mat4(1.0f), glm::vec3(20 + yPosition, -25.0f, -20 + xPosition));
-                    starworkTransforms[index] = glm::scale(starworkTransforms[index], glm::vec3(5.0f, 5.0f, 5.0f));
+                    starworkTransforms[index] = glm::translate(glm::mat4(1.0f), glm::vec3(20 + yPosition + uniforme_discrete(0, 2), -27.0f + uniforme(0, 2), -20 + xPosition + independance(1500)));
+                    starworkTransforms[index] = glm::scale(starworkTransforms[index], glm::vec3(5.f + bernoulli(0.5) * 5, 5.0f, 5.0f));
+                    // starworkTransforms[index] = glm::rotate(starworkTransforms[index], 1.0f, glm::vec3(0, 0, 0));
                 }
             }
 

@@ -86,18 +86,18 @@ bool independance(double p)
     return (rand() < p * RAND_MAX);
 }
 
-// Fonction pour générer un échantillon aléatoire selon la loi des permutations
-std::vector<int> permutations(int n)
-{
-    std::vector<int> perm(n);
-    for (int i = 0; i < n; ++i)
-    {
-        perm[i] = i;
-    }
-    for (int i = n - 1; i > 0; --i)
-    {
-        int j = rand() % (i + 1);
-        std::swap(perm[i], perm[j]);
-    }
-    return perm;
-}
+// // Fonction pour générer un échantillon aléatoire selon la loi des permutations
+// std::vector<int> permutations(int n)
+// {
+//     std::vector<int> perm(n);
+//     for (int i = 0; i < n; ++i)
+//     {
+//         perm[i] = i;
+//     }
+//     for (int i = n - 1; i > 0; --i)
+//     {
+//         int j = rand() % (i + 1);
+//         std::swap(perm[i], perm[j]);
+//     }
+//     return perm;
+// }

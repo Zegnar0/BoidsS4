@@ -54,3 +54,9 @@ glm::vec3 FreeflyCamera::getPosition() const
 {
     return m_Position;
 }
+
+void FreeflyCamera::setPosition(const glm::vec3& position)
+{
+    m_Position = position;
+    computeDirectionVectors();
+}
