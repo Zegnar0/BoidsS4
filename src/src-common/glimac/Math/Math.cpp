@@ -1,4 +1,5 @@
 #include "Math.hpp"
+#include <cmath>
 #include <cstdlib>
 #include <vector>
 
@@ -83,10 +84,16 @@ int uniforme_discrete(int min, int max)
     return rand() % (max - min + 1) + min;
 }
 
-// Fonction pour générer un échantillon aléatoire selon la loi de l'indépendance
-bool independance(double p)
+// Fonction pour générer un échantillon aléatoire selon la loi Normale
+double normale(double mu, double sigma)
 {
-    return static_cast<double>(rand()) / RAND_MAX < p;
+    double u1 = (double)rand() / RAND_MAX; // Génère un nombre réel aléatoire entre 0 et 1
+    double u2 = (double)rand() / RAND_MAX; // Génère un second nombre réel aléatoire entre 0 et 1
+
+    double z0 = sqrt(-2.0 * log(u1)) * cos(2 * M_PI * u2);
+
+    // Conversion de z0 standard à N(mu, sigma^2)
+    return mu + z0 * sigma;
 }
 
 // // Fonction pour générer un échantillon aléatoire selon la loi des permutations

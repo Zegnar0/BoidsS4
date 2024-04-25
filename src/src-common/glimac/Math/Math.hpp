@@ -21,7 +21,7 @@ double uniforme(double a, double b);
 int uniforme_discrete(int min, int max);
 
 // Fonction pour générer un échantillon aléatoire selon la loi de l'indépendance
-bool independance(double p);
+double normale(double mu, double sigma);
 
 // Fonction pour générer un échantillon aléatoire selon la loi des permutations
 std::vector<int> permutations(int n);
