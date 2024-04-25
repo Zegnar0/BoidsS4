@@ -18,11 +18,11 @@ double binomiale_continue(int n, double p)
         double r = (double)rand() / RAND_MAX; // Génère un nombre réel aléatoire entre 0 et 1
         if (r < p)
         {
-            count += r; // Incrémenter par la valeur aléatoire si elle est inférieure à p
+            count += r; 
         }
         else
         {
-            count += (1 - r) * (1 - p); // Ajoute une contribution basée sur la partie non favorable
+            count += (1 - r) * (1 - p); 
         }
     }
     return count;
@@ -43,10 +43,10 @@ double hypergeometrique_continue(int N, int K, int n)
         }
         else
         {
-            // Ajouter une fraction basée sur la probabilité inversée
+            
             count += (1 - p);
         }
-        --N; // Réduire la taille totale de la population à chaque échantillon
+        --N; 
     }
     return count;
 }
@@ -87,12 +87,11 @@ int uniforme_discrete(int min, int max)
 // Fonction pour générer un échantillon aléatoire selon la loi Normale
 double normale(double mu, double sigma)
 {
-    double u1 = (double)rand() / RAND_MAX; // Génère un nombre réel aléatoire entre 0 et 1
-    double u2 = (double)rand() / RAND_MAX; // Génère un second nombre réel aléatoire entre 0 et 1
+    double u1 = (double)rand() / RAND_MAX; 
+    double u2 = (double)rand() / RAND_MAX; 
 
     double z0 = sqrt(-2.0 * log(u1)) * cos(2 * M_PI * u2);
 
-    // Conversion de z0 standard à N(mu, sigma^2)
     return mu + z0 * sigma;
 }
 
